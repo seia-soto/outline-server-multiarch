@@ -111,8 +111,9 @@ git checkout "${CHECKPOINT}"
 
 # Modify build environment
 [[ -f "../etc/extra/scripts/build.action.sh" ]] && \cp -f "../etc/extra/scripts/build.action.sh" "src/shadowbox/docker/build.action.sh"
-sed -i .old '1s;^;ARG TARGETPLATFORM\n;' "src/shadowbox/docker/Dockerfile"
-sed -i .old '/COPY third_party/s/^COPY third_party third_party/COPY third_parties\/$\{TARGETPLATFORM\} third_party/' "src/shadowbox/docker/Dockerfile"
+
+sed -i -e '1s;^;ARG TARGETPLATFORM\n;' "src/shadowbox/docker/Dockerfile"
+sed -i -e '/COPY third_party/s/^COPY third_party third_party/COPY third_parties\/$\{TARGETPLATFORM\} third_party/' "src/shadowbox/docker/Dockerfile"
 
 # Build docker-image
 export SB_IMAGE="${TAG}"
