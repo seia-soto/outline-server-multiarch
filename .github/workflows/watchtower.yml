@@ -8,6 +8,9 @@ env:
 
 on:
   push:
+    paths:
+      - '.github/**'
+      - '**.sh'
   schedule:
     - cron: '0 0 * * *'
 
@@ -37,6 +40,9 @@ jobs:
 
             exit 0
           fi
+
+          # Log current version
+          cat version/local.txt
 
           echo ::set-output name=ver::$(cat version/local.txt)
 
