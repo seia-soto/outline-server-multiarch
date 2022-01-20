@@ -82,27 +82,15 @@ fi
 
 git checkout "${CHECKPOINT}"
 
-# Load NVM
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
-
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
 # Build docker-image
 export SB_IMAGE="${TAG}"
 
 if [[ "${USE_LEGACY_INSTALL}" == "true" ]]; then
-    nvm install 12
-    nvm use 12
-
     yarn
 
     yarn do shadowbox/server/build
     yarn do shadowbox/docker/build
 else
-    nvm install 16
-    nvm use 16
-
     npm install
 
     npm run action shadowbox/server/build

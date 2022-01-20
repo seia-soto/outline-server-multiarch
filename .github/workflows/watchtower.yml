@@ -50,10 +50,19 @@ jobs:
       matrix:
         arch: ['arm64']
         checkpoint: ['master', 'latest']
+        include:
+          - checkpoint: latest
+            node: 12
+          - checkpoint: master
+            node: 16
     if: needs.prepare.outputs.remote != needs.prepare.outputs.local
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
 
       - name: Build
         run: |
