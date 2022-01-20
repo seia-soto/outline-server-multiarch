@@ -48,7 +48,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: ['arm64', 'amd64']
         checkpoint: ['master', 'latest']
         include:
           - checkpoint: latest
@@ -75,7 +74,7 @@ jobs:
           matrix.checkpoint == 'master'
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
-          bash ./build.sh "${{ matrix.arch }}" "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}" "${{ matrix.checkpoint }}"
+          bash ./build.sh 'linux/arm64,linux/amd64' "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}" "${{ matrix.checkpoint }}"
 
       - name: Save artifacts
         run: |

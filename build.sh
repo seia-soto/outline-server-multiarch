@@ -29,12 +29,14 @@ readonly REPO_PROM="prometheus/prometheus"
 readonly NS_PROM="prometheus"
 
 TMP=$(mktemp -d)
+# Need to ARCH in build script
 ARCH=${1}
 TAG=${2}
 CHECKPOINT=${3}
 
-PATCH="extra/scripts/build_${ARCH}.action.sh"
 USE_LEGACY_INSTALL="false"
+
+export DOCKER_PLATFORMS="${ARCH}"
 
 gh_releases() {
     local REPO=${1}
@@ -63,19 +65,39 @@ unpack_archive_from_url() {
     tar -xf "${TMP}/${NAME}.archive" -C "${TMP}/${NAME}" --strip-components=${STRIP_LEVEL}
 }
 
+remap_arch() {
+    local ARCH="${1}" AMD64="${2:-amd64}" ARM64="${3:-arm64}" ARMv7="${4:-armv7}" ARMv6="${5:-armv6}"
+
+    [[ "${ARCH}" == *"amd64"* ]] && ARCH="${AMD64}"
+    [[ "${ARCH}" == *"arm64"* ]] && ARCH="${ARM64}"
+    [[ "${ARCH}" == *"v7"* ]] && ARCH="${ARMv7}"
+    [[ "${ARCH}" == *"v6"* ]] && ARCH="${ARMv6}"
+
+    echo "${ARCH}"
+}
+
 # Clone outline-server
 git clone "https://github.com/${REPO_BASE}.git" "${NS_BASE}"
 
-# Download outline-ss-server
-ARCH_SSS="${ARCH}"
-[[ ARCH_SSS == "amd64" ]] && ARCH_SSS="x86_64"
+# Multi arch build
+for C_ARCH in ${ARCH//,/ }
+do
+    # Copy original third_party
+    mkdir -p "${NS_BASE}/third_parties/${C_ARCH}"
+    \cp -rf "${NS_BASE}/third_party" "${NS_BASE}/third_parties/${C_ARCH}"
 
-unpack_archive_from_url "${NS_SSS}" "$(gh_release_asset_url_by_arch "${REPO_SSS}" "linux_${ARCH_SSS}")" "0"
-\cp -f "${TMP}/${NS_SSS}/outline-ss-server" "${NS_BASE}/third_party/outline-ss-server/linux/outline-ss-server"
+    # Download outline-ss-server
+    local ARCH_SSS="$(remap_arch "${C_ARCH}" linux_x86_64 linux_arm64 linux_armv7 linux_armv6)"
 
-# Download prometheus
-unpack_archive_from_url "${NS_PROM}" "$(gh_release_asset_url_by_arch "${REPO_PROM}" "linux-${ARCH}")" "1"
-\cp -f "${TMP}/${NS_PROM}/prometheus" "${NS_BASE}/third_party/prometheus/linux/prometheus"
+    unpack_archive_from_url "${NS_SSS}" "$(gh_release_asset_url_by_arch "${REPO_SSS}" "linux_${ARCH_SSS}")" "0"
+    \cp -f "${TMP}/${NS_SSS}/outline-ss-server" "${NS_BASE}/third_parties/${C_ARCH}/outline-ss-server/linux/outline-ss-server"
+
+    # Download prometheus
+    local ARCH_PROM="$(remap_arch "${C_ARCH}" linux-amd64 linux-arm64 linux-armv7 linux-armv6)"
+
+    unpack_archive_from_url "${NS_PROM}" "$(gh_release_asset_url_by_arch "${REPO_PROM}" "linux-${ARCH_PROM}")" "1"
+    \cp -f "${TMP}/${NS_PROM}/prometheus" "${NS_BASE}/third_parties/${C_ARCH}/prometheus/linux/prometheus"
+done
 
 # Go to repo and checkout to latest release
 cd "${NS_BASE}"
@@ -87,19 +109,20 @@ fi
 
 git checkout "${CHECKPOINT}"
 
+# Modify build environment
+[[ -f "../etc/extra/scripts/build.action.sh" ]] && \cp -f "../etc/extra/scripts/build.action.sh" "src/shadowbox/docker/build.action.sh"
+sed -i .old '1s;^;ARG TARGETPLATFORM\n;' "src/shadowbox/docker/Dockerfile"
+sed -i .old '/COPY third_party/s/^COPY third_party third_party/COPY third_parties\/$\{TARGETPLATFORM\} third_party/' "src/shadowbox/docker/Dockerfile"
+
 # Build docker-image
 export SB_IMAGE="${TAG}"
 export DOCKER_CONTENT_TRUST="0"
 
 if [[ "${USE_LEGACY_INSTALL}" == "true" ]]; then
-    [[ -f "../${PATCH}" ]] && \cp -f "../${PATCH}" "src/shadowbox/docker/build_action.sh"
-
     export NODE_IMAGE="node:12-alpine"
 
     npm run do shadowbox/docker/build
 else
-    [[ -f "../${PATCH}" ]] && \cp -f "../${PATCH}" "src/shadowbox/docker/build.action.sh"
-
     export NODE_IMAGE="node:16-alpine"
 
     npm run action shadowbox/docker/build
