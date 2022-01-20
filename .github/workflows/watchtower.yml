@@ -21,7 +21,7 @@ jobs:
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
 
-      - name: Get latest tag
+      - name: Get latest version
         id: remote
         run: |
           echo ::set-output name=ver::$( \
@@ -29,7 +29,7 @@ jobs:
             jq -r '[.[] | select(.prerelease == false)][0].tag_name'
           )
 
-      - name: Set flag to run
+      - name: Get local version
         id: local
         run: |
           if [[ ! -f version/local.txt ]]; then
@@ -55,9 +55,6 @@ jobs:
             node: 12
           - checkpoint: master
             node: 16
-    if: |
-      (needs.prepare.outputs.remote != needs.prepare.outputs.local) ||
-      (matrix.checkpoint != 'latest')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -66,19 +63,24 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Build
+      - name: Build and release
+        if: |
+          (matrix.checkpoint == 'latest' && needs.prepare.outputs.remote != needs.prepare.outputs.local) ||
+          matrix.checkpoint == 'master'
         run: |
           bash ./build.sh "${{ matrix.arch }}" "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}-${{ matrix.arch }}" "${{ matrix.checkpoint }}"
 
-      - name: Upload to registry and save version
-        run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
           docker push "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}-${{ matrix.arch }}"
 
+      - name: Save version
+        run: |
           echo "${{ needs.prepare.outputs.remote }}" > local.txt
 
       - name: Upload version
-        if: ${{ matrix.checkpoint == 'latest' }}
+        if: |
+          needs.prepare.outputs.remote != needs.prepare.outputs.local &&
+          matrix.checkpoint == 'latest'
         uses: actions/upload-artifact@v2
         with:
           name: version
