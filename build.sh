@@ -86,14 +86,8 @@ git checkout "${CHECKPOINT}"
 export SB_IMAGE="${TAG}"
 
 if [[ "${USE_LEGACY_INSTALL}" == "true" ]]; then
-    yarn
-
-    yarn do shadowbox/server/build
-    yarn do shadowbox/docker/build
+    npm run do shadowbox/docker/build
 else
-    npm install
-
-    npm run action shadowbox/server/build
     npm run action shadowbox/docker/build
 fi
 
