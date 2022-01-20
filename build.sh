@@ -10,7 +10,7 @@ Usage:
 
     $arch {string} The arch to build, like arm64
     $tag {string} The docker tag to use while building the image
-    $checkpoint {string} The git branch or tag to build
+    $checkpoint {string} The git branch or tag to build, using `latest` will automatically use latest release tag
 
 About:
 
@@ -32,6 +32,8 @@ TMP=$(mktemp -d)
 ARCH=${1}
 TAG=${2}
 CHECKPOINT=${3}
+
+PATCH="extra/scripts/build_${ARCH}.action.sh"
 USE_LEGACY_INSTALL="false"
 
 gh_releases() {
@@ -66,11 +68,11 @@ git clone "https://github.com/${REPO_BASE}.git" "${NS_BASE}"
 
 # Download outline-ss-server
 unpack_archive_from_url "${NS_SSS}" "$(gh_release_asset_url_by_arch "${REPO_SSS}" "linux_${ARCH}")" "0"
-cp -f "${TMP}/${NS_SSS}/outline-ss-server" "${NS_BASE}/third_party/outline-ss-server/linux/outline-ss-server"
+\cp -f "${TMP}/${NS_SSS}/outline-ss-server" "${NS_BASE}/third_party/outline-ss-server/linux/outline-ss-server"
 
 # Download prometheus
 unpack_archive_from_url "${NS_PROM}" "$(gh_release_asset_url_by_arch "${REPO_PROM}" "linux-${ARCH}")" "1"
-cp -f "${TMP}/${NS_PROM}/prometheus" "${NS_BASE}/third_party/prometheus/linux/prometheus"
+\cp -f "${TMP}/${NS_PROM}/prometheus" "${NS_BASE}/third_party/prometheus/linux/prometheus"
 
 # Go to repo and checkout to latest release
 cd "${NS_BASE}"
@@ -84,10 +86,15 @@ git checkout "${CHECKPOINT}"
 
 # Build docker-image
 export SB_IMAGE="${TAG}"
+export DOCKER_CONTENT_TRUST="0"
 
 if [[ "${USE_LEGACY_INSTALL}" == "true" ]]; then
+    [[ -f "../${PATCH}" ]] && \cp -f "../${PATCH}" "src/shadowbox/docker/build_action.sh"
+
     npm run do shadowbox/docker/build
 else
+    [[ -f "../${PATCH}" ]] && \cp -f "../${PATCH}" "src/shadowbox/docker/build.action.sh"
+
     npm run action shadowbox/docker/build
 fi
 
