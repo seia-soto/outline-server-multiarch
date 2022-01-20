@@ -32,6 +32,7 @@ TMP=$(mktemp -d)
 ARCH=${1}
 TAG=${2}
 CHECKPOINT=${3}
+USE_LEGACY_INSTALL="false"
 
 gh_releases() {
     local REPO=${1}
@@ -74,7 +75,10 @@ cp -f "${TMP}/${NS_PROM}/prometheus" "${NS_BASE}/third_party/prometheus/linux/pr
 # Go to repo and checkout to latest release
 cd "${NS_BASE}"
 
-[[ -z "${CHECKPOINT}" || "${CHECKPOINT}" == "latest" ]] && CHECKPOINT="tags/$(gh_releases "${REPO_BASE}" | jq -r '.tag_name')";
+if [[ -z "${CHECKPOINT}" || "${CHECKPOINT}" == "latest" ]]; then
+    CHECKPOINT="tags/$(gh_releases "${REPO_BASE}" | jq -r '.tag_name')"
+    USE_LEGACY_INSTALL="true"
+fi
 
 git checkout "${CHECKPOINT}"
 
@@ -85,7 +89,7 @@ export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || pr
 # Build docker-image
 export SB_IMAGE="${TAG}"
 
-if [[ "${CHECKPOINT}" == "latest" ]]; then
+if [[ "${USE_LEGACY_INSTALL}" == "true" ]]; then
     nvm install 12
     nvm use 12
 

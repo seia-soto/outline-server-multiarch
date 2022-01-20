@@ -57,7 +57,7 @@ jobs:
 
       - name: Build
         run: |
-          ./build.sh "${{ matrix.arch }}" "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}-${{ matrix.arch }}" "${{ matrix.checkpoint }}"
+          bash ./build.sh "${{ matrix.arch }}" "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}-${{ matrix.arch }}" "${{ matrix.checkpoint }}"
 
       - name: Upload to registry and save version
         run: |
