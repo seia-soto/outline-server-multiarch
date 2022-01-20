@@ -1,0 +1,71 @@
+name: Watchtower
+
+permissions:
+  packages: write
+
+env:
+  PACKAGE_TAG: 'ghcr.io/seia-soto/shadowbox:nightly'
+
+on:
+  push:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  prepare:
+    runs-on: ubuntu-20.04
+    outputs:
+      local: ${{ steps.local.outputs.ver }}
+      remote: ${{ steps.remote.outputs.ver }}
+    steps:
+      - name: Download all workflow run artifacts
+        uses: actions/download-artifact@v2
+
+      - name: Get latest tag
+        id: remote
+        run: |
+          echo ::set-output name=ver::$( \
+            curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/releases | \
+            jq -r '[.[] | select(.prerelease == false)][0].tag_name'
+          )
+
+      - name: Set flag to run
+        id: local
+        run: |
+          if [[ ! -f version/local.txt ]]; then
+            echo ::set-output name=ver::v0
+
+            exit 0
+          fi
+
+          echo ::set-output name=ver::$(cat version/local.txt)
+
+  build:
+    runs-on: ubuntu-20.04
+    needs: [
+      prepare
+    ]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: ['arm64']
+    if: needs.prepare.outputs.remote != needs.prepare.outputs.local
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: |
+          ./build.sh "${{ matrix.arch }}" "${{ env.PACKAGE_TAG }}-${{ matrix.arch }}"
+
+      - name: Upload to registry and save version
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
+          docker push "${{ env.PACKAGE_TAG }}-${{ matrix.arch }}"
+
+          echo "${{ needs.prepare.outputs.remote }}" > local.txt
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: version
+          path: local.txt
