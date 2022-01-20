@@ -67,7 +67,10 @@ unpack_archive_from_url() {
 git clone "https://github.com/${REPO_BASE}.git" "${NS_BASE}"
 
 # Download outline-ss-server
-unpack_archive_from_url "${NS_SSS}" "$(gh_release_asset_url_by_arch "${REPO_SSS}" "linux_${ARCH}")" "0"
+ARCH_SSS="${ARCH}"
+[[ ARCH_SSS == "amd64" ]] && ARCH_SSS="x86_64"
+
+unpack_archive_from_url "${NS_SSS}" "$(gh_release_asset_url_by_arch "${REPO_SSS}" "linux_${ARCH_SSS}")" "0"
 \cp -f "${TMP}/${NS_SSS}/outline-ss-server" "${NS_BASE}/third_party/outline-ss-server/linux/outline-ss-server"
 
 # Download prometheus

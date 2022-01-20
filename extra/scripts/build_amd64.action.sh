@@ -30,7 +30,7 @@ export NODE_IMAGE="${NODE_IMAGE:-node:12-alpine}"
 
 docker pull "${NODE_IMAGE}"
 docker buildx build \
-    --platform=linux/arm64 \
+    --platform=linux/amd64 \
     --force-rm \
     --build-arg NODE_IMAGE="${NODE_IMAGE}" \
     --build-arg GITHUB_RELEASE="${TRAVIS_TAG:-none}" \

@@ -48,7 +48,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: ['arm64']
+        arch: ['arm64', 'amd64']
         checkpoint: ['master', 'latest']
         include:
           - checkpoint: latest
@@ -68,16 +68,16 @@ jobs:
           DEBIAN_FRONTEND=noninteractive sudo apt-get install qemu qemu-user-static binfmt-support debootstrap -y
 
           docker buildx create --use --name outline-server-multiarch-builder
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
 
       - name: Build and release
         if: |
           (matrix.checkpoint == 'latest' && needs.prepare.outputs.remote != needs.prepare.outputs.local) ||
           matrix.checkpoint == 'master'
         run: |
-          bash ./build.sh "${{ matrix.arch }}" "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}-${{ matrix.arch }}" "${{ matrix.checkpoint }}"
+          bash ./build.sh "${{ matrix.arch }}" "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}" "${{ matrix.checkpoint }}"
 
-          docker push "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}-${{ matrix.arch }}"
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
+          docker push "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}"
 
       - name: Save artifacts
         run: |
