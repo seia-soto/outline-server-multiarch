@@ -55,7 +55,9 @@ jobs:
             node: 12
           - checkpoint: master
             node: 16
-    if: needs.prepare.outputs.remote != needs.prepare.outputs.local
+    if: |
+      (needs.prepare.outputs.remote != needs.prepare.outputs.local) ||
+      (matrix.checkpoint != 'latest')
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -76,7 +78,7 @@ jobs:
           echo "${{ needs.prepare.outputs.remote }}" > local.txt
 
       - name: Upload version
-        if: ${{ matrix.arch == 'latest' }}
+        if: ${{ matrix.checkpoint == 'latest' }}
         uses: actions/upload-artifact@v2
         with:
           name: version
