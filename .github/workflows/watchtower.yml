@@ -63,6 +63,11 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
+      - name: Prepare environment
+        run: |
+          docker buildx create --use --name outline-server-multiarch-builder
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
+
       - name: Build and release
         if: |
           (matrix.checkpoint == 'latest' && needs.prepare.outputs.remote != needs.prepare.outputs.local) ||
@@ -70,7 +75,6 @@ jobs:
         run: |
           bash ./build.sh "${{ matrix.arch }}" "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}-${{ matrix.arch }}" "${{ matrix.checkpoint }}"
 
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
           docker push "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}-${{ matrix.arch }}"
 
       - name: Save artifacts

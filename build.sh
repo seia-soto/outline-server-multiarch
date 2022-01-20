@@ -91,9 +91,13 @@ export DOCKER_CONTENT_TRUST="0"
 if [[ "${USE_LEGACY_INSTALL}" == "true" ]]; then
     [[ -f "../${PATCH}" ]] && \cp -f "../${PATCH}" "src/shadowbox/docker/build_action.sh"
 
+    export NODE_IMAGE="node:12-alpine"
+
     npm run do shadowbox/docker/build
 else
     [[ -f "../${PATCH}" ]] && \cp -f "../${PATCH}" "src/shadowbox/docker/build.action.sh"
+
+    export NODE_IMAGE="node:16-alpine"
 
     npm run action shadowbox/docker/build
 fi

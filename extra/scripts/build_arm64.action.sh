@@ -27,14 +27,14 @@ export DOCKER_CONTENT_TRUST=0 # Disable content trust
 export DOCKER_BUILDKIT=1 # Enable buildkit
 
 # Use cross-platform image
-readonly NODE_IMAGE="node:12-alpine"
+export NODE_IMAGE="arm64v8/${NODE_IMAGE:-node:12-alpine}"
 
 docker pull "${NODE_IMAGE}"
 docker buildx build \
     --platform=linux/arm64 \
     --force-rm \
     --build-arg NODE_IMAGE="${NODE_IMAGE}" \
-    # --build-arg GITHUB_RELEASE="${TRAVIS_TAG:-none}" \ ## We just marked out useless line for us
+    --build-arg GITHUB_RELEASE="${TRAVIS_TAG:-none}" \
     -f src/shadowbox/docker/Dockerfile \
     -t "${SB_IMAGE:-outline/shadowbox}" \
     "${ROOT_DIR}"
