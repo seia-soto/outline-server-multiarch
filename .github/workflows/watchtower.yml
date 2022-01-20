@@ -74,10 +74,8 @@ jobs:
           (matrix.checkpoint == 'latest' && needs.prepare.outputs.remote != needs.prepare.outputs.local) ||
           matrix.checkpoint == 'master'
         run: |
-          bash ./build.sh "${{ matrix.arch }}" "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}" "${{ matrix.checkpoint }}"
-
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
-          docker push "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}"
+          bash ./build.sh "${{ matrix.arch }}" "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}" "${{ matrix.checkpoint }}"
 
       - name: Save artifacts
         run: |

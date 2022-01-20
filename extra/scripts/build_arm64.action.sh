@@ -30,6 +30,7 @@ export NODE_IMAGE="${NODE_IMAGE:-node:12-alpine}"
 
 docker pull "${NODE_IMAGE}"
 docker buildx build \
+    --push \
     --platform=linux/arm64 \
     --force-rm \
     --build-arg NODE_IMAGE="${NODE_IMAGE}" \
