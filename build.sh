@@ -1,15 +1,16 @@
 #!/bin/bash
-set -ix
+set -x
 
 : '
 # by HoJeong Go
 
 Usage:
 
-    ./build.sh $arch $tag
+    ./build.sh $arch $tag $checkpoint
 
     $arch {string} The arch to build, like arm64
     $tag {string} The docker tag to use while building the image
+    $checkpoint {string} The git branch or tag to build
 
 About:
 
@@ -28,8 +29,9 @@ readonly REPO_PROM="prometheus/prometheus"
 readonly NS_PROM="prometheus"
 
 TMP=$(mktemp -d)
-readonly ARCH=${1}
-readonly TAG=${2}
+ARCH=${1}
+TAG=${2}
+CHECKPOINT=${3}
 
 gh_releases() {
     local REPO=${1}
@@ -71,18 +73,34 @@ cp -f "${TMP}/${NS_PROM}/prometheus" "${NS_BASE}/third_party/prometheus/linux/pr
 
 # Go to repo and checkout to latest release
 cd "${NS_BASE}"
-git checkout "tags/$(gh_releases "${REPO_BASE}" | jq -r '.tag_name')"
+
+[[ -z "${CHECKPOINT}" ]] && CHECKPOINT="tags/$(gh_releases "${REPO_BASE}" | jq -r '.tag_name')";
+
+git checkout "${CHECKPOINT}"
 
 # Build docker-image
 export SB_IMAGE="${TAG}"
 
-npm install
+if [[ "${CHECKPOINT}" == "master" ]]; then
+    nvm install 16
+    nvm use 16
 
-npm run action shadowbox/server/build
-npm run action shadowbox/docker/build
+    npm install
+
+    npm run action shadowbox/server/build
+    npm run action shadowbox/docker/build
+else
+    nvm install 12
+    nvm use 12
+
+    yarn
+
+    yarn do shadowbox/server/build
+    yarn do shadowbox/docker/build
+fi
 
 # Clean-up
 cd ..
 
 rm -rf "${TMP}"
-rm -rf "./${NS_BASE}"
+rm -rf "${NS_BASE}"

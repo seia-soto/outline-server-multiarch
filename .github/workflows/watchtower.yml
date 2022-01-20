@@ -49,6 +49,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: ['arm64']
+        checkpoint: ['master', '']
     if: needs.prepare.outputs.remote != needs.prepare.outputs.local
     steps:
       - name: Checkout repository
@@ -56,12 +57,12 @@ jobs:
 
       - name: Build
         run: |
-          ./build.sh "${{ matrix.arch }}" "${{ env.PACKAGE_TAG }}-${{ matrix.arch }}"
+          ./build.sh "${{ matrix.arch }}" "${{ env.PACKAGE_TAG }}-${{ matrix.checkpoint }}-${{ matrix.arch }}" "${{ matrix.checkpoint }}"
 
       - name: Upload to registry and save version
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
-          docker push "${{ env.PACKAGE_TAG }}-${{ matrix.arch }}"
+          docker push "${{ env.PACKAGE_TAG }}-${{ matrix.checkpoint }}-${{ matrix.arch }}"
 
           echo "${{ needs.prepare.outputs.remote }}" > local.txt
 
