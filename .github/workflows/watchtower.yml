@@ -35,6 +35,8 @@ jobs:
       - name: Get local version
         id: local
         run: |
+          ls -R1
+
           if [[ ! -f version/local.txt ]]; then
             echo ::set-output name=ver::v0
 
