@@ -21,6 +21,9 @@ jobs:
       local: ${{ steps.local.outputs.ver }}
       remote: ${{ steps.remote.outputs.ver }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Download all workflow run artifacts
         uses: actions/download-artifact@v2
 
