@@ -27,7 +27,7 @@ export DOCKER_CONTENT_TRUST=0 # Disable content trust
 export DOCKER_BUILDKIT=1 # Enable buildkit
 
 # Use cross-platform image
-export NODE_IMAGE="arm64v8/${NODE_IMAGE:-node:12-alpine}"
+export NODE_IMAGE="${NODE_IMAGE:-node:12-alpine}"
 
 docker pull "${NODE_IMAGE}"
 docker buildx build \

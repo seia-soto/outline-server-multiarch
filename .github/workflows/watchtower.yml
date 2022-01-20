@@ -65,6 +65,8 @@ jobs:
 
       - name: Prepare environment
         run: |
+          DEBIAN_FRONTEND=noninteractive apt-get install qemu qemu-user-static binfmt-support debootstrap -y
+
           docker buildx create --use --name outline-server-multiarch-builder
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
 
