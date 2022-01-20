@@ -4,7 +4,7 @@ permissions:
   packages: write
 
 env:
-  PACKAGE_TAG: 'ghcr.io/seia-soto/shadowbox:nightly'
+  PACKAGE_NAME: 'ghcr.io/seia-soto/shadowbox'
 
 on:
   push:
@@ -49,7 +49,7 @@ jobs:
       fail-fast: false
       matrix:
         arch: ['arm64']
-        checkpoint: ['master', '']
+        checkpoint: ['master', 'latest']
     if: needs.prepare.outputs.remote != needs.prepare.outputs.local
     steps:
       - name: Checkout repository
@@ -57,12 +57,12 @@ jobs:
 
       - name: Build
         run: |
-          ./build.sh "${{ matrix.arch }}" "${{ env.PACKAGE_TAG }}-${{ matrix.checkpoint }}-${{ matrix.arch }}" "${{ matrix.checkpoint }}"
+          ./build.sh "${{ matrix.arch }}" "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}-${{ matrix.arch }}" "${{ matrix.checkpoint }}"
 
       - name: Upload to registry and save version
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
-          docker push "${{ env.PACKAGE_TAG }}-${{ matrix.checkpoint }}-${{ matrix.arch }}"
+          docker push "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}-${{ matrix.arch }}"
 
           echo "${{ needs.prepare.outputs.remote }}" > local.txt
 

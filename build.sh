@@ -74,22 +74,18 @@ cp -f "${TMP}/${NS_PROM}/prometheus" "${NS_BASE}/third_party/prometheus/linux/pr
 # Go to repo and checkout to latest release
 cd "${NS_BASE}"
 
-[[ -z "${CHECKPOINT}" ]] && CHECKPOINT="tags/$(gh_releases "${REPO_BASE}" | jq -r '.tag_name')";
+[[ -z "${CHECKPOINT}" || "${CHECKPOINT}" == "latest" ]] && CHECKPOINT="tags/$(gh_releases "${REPO_BASE}" | jq -r '.tag_name')";
 
 git checkout "${CHECKPOINT}"
+
+# Load NVM
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
 # Build docker-image
 export SB_IMAGE="${TAG}"
 
-if [[ "${CHECKPOINT}" == "master" ]]; then
-    nvm install 16
-    nvm use 16
-
-    npm install
-
-    npm run action shadowbox/server/build
-    npm run action shadowbox/docker/build
-else
+if [[ "${CHECKPOINT}" == "latest" ]]; then
     nvm install 12
     nvm use 12
 
@@ -97,6 +93,14 @@ else
 
     yarn do shadowbox/server/build
     yarn do shadowbox/docker/build
+else
+    nvm install 16
+    nvm use 16
+
+    npm install
+
+    npm run action shadowbox/server/build
+    npm run action shadowbox/docker/build
 fi
 
 # Clean-up
