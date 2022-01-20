@@ -24,9 +24,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Download all workflow run artifacts
-        uses: actions/download-artifact@v2
-
       - name: Get latest version
         id: remote
         run: |
@@ -38,18 +35,13 @@ jobs:
       - name: Get local version
         id: local
         run: |
-          ls -R1
-
-          if [[ ! -f version/local.txt ]]; then
+          if [[ ! -f etc/versions/local.txt ]]; then
             echo ::set-output name=ver::v0
 
             exit 0
           fi
 
-          # Log current version
-          cat version/local.txt
-
-          echo ::set-output name=ver::$(cat version/local.txt)
+          echo ::set-output name=ver::$(cat etc/versions/local.txt)
 
   build:
     runs-on: ubuntu-20.04
@@ -84,15 +76,26 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
           docker push "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}-${{ matrix.arch }}"
 
-      - name: Save version
+      - name: Save artifacts
         run: |
-          echo "${{ needs.prepare.outputs.remote }}" > local.txt
+          echo "${{ needs.prepare.outputs.remote }}" > etc/versions/local.txt
 
-      - name: Upload version
+      - name: Commit artifacts
         if: |
           needs.prepare.outputs.remote != needs.prepare.outputs.local &&
           matrix.checkpoint == 'latest'
-        uses: actions/upload-artifact@v2
+        uses: EndBug/add-and-commit@v7
         with:
-          name: version
-          path: local.txt
+          add: '.'
+          author_name: HoJeong Go
+          author_email: seia@outlook.kr
+          branch: master
+          branch_mode: create
+          committer_name: GitHub Action
+          committer_email: 30369714+seia-soto@users.noreply.github.com
+          cwd: '.'
+          default_author: github_actor
+          message: 'chore(ci): save latest version string'
+          pathspec_error_handling: ignore
+          pull: '--no-rebase'
+          push: true
