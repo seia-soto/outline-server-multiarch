@@ -1,8 +1,5 @@
 name: Watchtower
 
-permissions:
-  packages: write
-
 env:
   PACKAGE_NAME: 'ghcr.io/seia-soto/shadowbox'
 
