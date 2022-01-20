@@ -78,7 +78,7 @@ jobs:
 
       - name: Save artifacts
         run: |
-          mkdir -p /etc/versions
+          mkdir -p etc/versions
           echo "${{ needs.prepare.outputs.remote }}" > etc/versions/local.txt
 
       - name: Commit artifacts
