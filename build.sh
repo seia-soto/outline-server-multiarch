@@ -110,8 +110,6 @@ fi
 git checkout "${CHECKPOINT}"
 
 # Modify build environment
-[[ -f "../etc/extra/scripts/build.action.sh" ]] && \cp -f "../etc/extra/scripts/build.action.sh" "src/shadowbox/docker/build.action.sh"
-
 sed -i -e '1s;^;ARG TARGETPLATFORM\n;' "src/shadowbox/docker/Dockerfile"
 sed -i -e '/COPY third_party/s/^COPY third_party third_party/COPY third_parties\/$\{TARGETPLATFORM\} third_party/' "src/shadowbox/docker/Dockerfile"
 
@@ -122,9 +120,13 @@ export DOCKER_CONTENT_TRUST="0"
 if [[ "${USE_LEGACY_INSTALL}" == "true" ]]; then
     export NODE_IMAGE="node:12-alpine"
 
+    \cp -f "../extra/scripts/build.action.sh" "src/shadowbox/docker/build_action.sh"
+
     npm run do shadowbox/docker/build
 else
     export NODE_IMAGE="node:16-alpine"
+
+    \cp -f "../extra/scripts/build.action.sh" "src/shadowbox/docker/build.action.sh"
 
     npm run action shadowbox/docker/build
 fi
