@@ -110,7 +110,9 @@ fi
 git checkout "${CHECKPOINT}"
 
 # Modify build environment
-sed -i -e '/COPY third_party/s/^COPY third_party third_party/ARG TARGETPLATFORM\nCOPY third_parties\/\$\{TARGETPLATFORM\} third_party/' "src/shadowbox/docker/Dockerfile"
+sed -i -e \
+    '/COPY third_party/s/^COPY third_party third_party/ARG TARGETPLATFORM\nCOPY third_parties\/\$\{TARGETPLATFORM\}/third_party third_party/' \
+    "src/shadowbox/docker/Dockerfile"
 
 cat src/shadowbox/docker/Dockerfile
 
