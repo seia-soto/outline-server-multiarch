@@ -94,7 +94,7 @@ for C_ARCH in ${ARCH//,/ }
 do
     # Copy original third_party
     mkdir -p "third_parties/${C_ARCH}"
-    \cp -rf "third_party/*" "third_parties/${C_ARCH}"
+    \cp -rf "third_party/." "third_parties/${C_ARCH}"
 
     # Download outline-ss-server
     local ARCH_SSS="$(remap_arch "${C_ARCH}" linux_x86_64 linux_arm64 linux_armv7 linux_armv6)"
