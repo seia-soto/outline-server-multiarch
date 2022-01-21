@@ -111,7 +111,9 @@ git checkout "${CHECKPOINT}"
 
 # Modify build environment
 sed -i -e '1s;^;ARG TARGETPLATFORM\n;' "src/shadowbox/docker/Dockerfile"
-sed -i -e '/COPY third_party/s/^COPY third_party third_party/COPY third_parties\/$\{TARGETPLATFORM\} third_party/' "src/shadowbox/docker/Dockerfile"
+sed -i -e '/COPY third_party/s/^COPY third_party third_party/COPY third_parties\/\$\{TARGETPLATFORM\} third_party/' "src/shadowbox/docker/Dockerfile"
+
+cat src/shadowbox/docker/Dockerfile
 
 # Build docker-image
 export SB_IMAGE="${TAG}"
@@ -135,4 +137,4 @@ fi
 cd ..
 
 rm -rf "${TMP}"
-rm -rf "${NS_BASE}"
+#rm -rf "${NS_BASE}"

@@ -62,18 +62,27 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      - name: Prepare environment
-        run: |
-          DEBIAN_FRONTEND=noninteractive sudo apt-get install qemu qemu-user-static binfmt-support debootstrap -y
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
 
-          docker buildx create --use --name outline-server-multiarch-builder
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and release
         if: |
           (matrix.checkpoint == 'latest' && needs.prepare.outputs.remote != needs.prepare.outputs.local) ||
           matrix.checkpoint == 'master'
         run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u USERNAME --password-stdin
           bash ./build.sh 'linux/arm64,linux/amd64' "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}" "${{ matrix.checkpoint }}"
 
       - name: Save artifacts
