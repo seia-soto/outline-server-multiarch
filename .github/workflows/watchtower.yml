@@ -2,6 +2,7 @@ name: Watchtower
 
 env:
   PACKAGE_NAME: 'ghcr.io/seia-soto/shadowbox'
+  ARCH: 'linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6'
 
 on:
   push:
@@ -83,7 +84,7 @@ jobs:
           (matrix.checkpoint == 'latest' && needs.prepare.outputs.remote != needs.prepare.outputs.local) ||
           matrix.checkpoint == 'master'
         run: |
-          bash ./build.sh 'linux/arm64,linux/amd64' "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}" "${{ matrix.checkpoint }}"
+          bash ./build.sh "${{ env.ARCH }}" "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}" "${{ matrix.checkpoint }}"
 
       - name: Save artifacts
         run: |
