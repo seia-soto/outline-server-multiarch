@@ -79,28 +79,6 @@ remap_arch() {
 # Clone outline-server
 git clone "https://github.com/${REPO_BASE}.git" "${NS_BASE}"
 
-# Multi arch build
-for C_ARCH in ${ARCH//,/ }
-do
-    # Copy original third_party
-    mkdir -p "${NS_BASE}/third_parties/${C_ARCH}"
-    \cp -rf "${NS_BASE}/third_party/*" "${NS_BASE}/third_parties/${C_ARCH}"
-
-    # Download outline-ss-server
-    local ARCH_SSS="$(remap_arch "${C_ARCH}" linux_x86_64 linux_arm64 linux_armv7 linux_armv6)"
-
-    unpack_archive_from_url "${NS_SSS}" "$(gh_release_asset_url_by_arch "${REPO_SSS}" "linux_${ARCH_SSS}")" "0"
-    \cp -f "${TMP}/${NS_SSS}/outline-ss-server" "${NS_BASE}/third_parties/${C_ARCH}/outline-ss-server/linux/outline-ss-server"
-    chmod +x "${NS_BASE}/third_parties/${C_ARCH}/outline-ss-server/linux/outline-ss-server"
-
-    # Download prometheus
-    local ARCH_PROM="$(remap_arch "${C_ARCH}" linux-amd64 linux-arm64 linux-armv7 linux-armv6)"
-
-    unpack_archive_from_url "${NS_PROM}" "$(gh_release_asset_url_by_arch "${REPO_PROM}" "linux-${ARCH_PROM}")" "1"
-    \cp -f "${TMP}/${NS_PROM}/prometheus" "${NS_BASE}/third_parties/${C_ARCH}/prometheus/linux/prometheus"
-    chmod +x "${NS_BASE}/third_parties/${C_ARCH}/prometheus/linux/prometheus"
-done
-
 # Go to repo and checkout to latest release
 cd "${NS_BASE}"
 
@@ -110,6 +88,28 @@ if [[ -z "${CHECKPOINT}" || "${CHECKPOINT}" == "latest" ]]; then
 fi
 
 git checkout "${CHECKPOINT}"
+
+# Multi arch build
+for C_ARCH in ${ARCH//,/ }
+do
+    # Copy original third_party
+    mkdir -p "third_parties/${C_ARCH}"
+    \cp -rf "third_party/*" "third_parties/${C_ARCH}"
+
+    # Download outline-ss-server
+    local ARCH_SSS="$(remap_arch "${C_ARCH}" linux_x86_64 linux_arm64 linux_armv7 linux_armv6)"
+
+    unpack_archive_from_url "${NS_SSS}" "$(gh_release_asset_url_by_arch "${REPO_SSS}" "linux_${ARCH_SSS}")" "0"
+    \cp -f "${TMP}/${NS_SSS}/outline-ss-server" "third_parties/${C_ARCH}/outline-ss-server/linux/outline-ss-server"
+    chmod +x "third_parties/${C_ARCH}/outline-ss-server/linux/outline-ss-server"
+
+    # Download prometheus
+    local ARCH_PROM="$(remap_arch "${C_ARCH}" linux-amd64 linux-arm64 linux-armv7 linux-armv6)"
+
+    unpack_archive_from_url "${NS_PROM}" "$(gh_release_asset_url_by_arch "${REPO_PROM}" "linux-${ARCH_PROM}")" "1"
+    \cp -f "${TMP}/${NS_PROM}/prometheus" "third_parties/${C_ARCH}/prometheus/linux/prometheus"
+    chmod +x "third_parties/${C_ARCH}/prometheus/linux/prometheus"
+done
 
 # Modify build environment
 sed -i -e \
