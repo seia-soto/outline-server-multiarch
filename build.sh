@@ -62,7 +62,7 @@ unpack_archive_from_url() {
     mkdir -p "${TMP}/${NAME}"
 
     curl -sL "${URL}" -o "${TMP}/${NAME}.archive"
-    tar -xf "${TMP}/${NAME}.archive" -C "${TMP}/${NAME}" --strip-components=${STRIP_LEVEL}
+    tar -xf "${TMP}/${NAME}.archive" -C "${TMP}/${NAME}" --strip-components="${STRIP_LEVEL}"
 }
 
 remap_arch() {
@@ -90,6 +90,9 @@ fi
 git checkout "${CHECKPOINT}"
 
 # Multi arch build
+RES_SSS=""
+RES_PROM=""
+
 for C_ARCH in ${ARCH//,/ }
 do
     # Copy original third_party
@@ -98,18 +101,18 @@ do
 
     # Download outline-ss-server
     ARCH_SSS="$(remap_arch "${C_ARCH}" x86_64 arm64 armv7 armv6)"
+    [[ -z "${RES_SSS}" ]] && RES_SSS="$(gh_release_asset_url_by_arch "${REPO_SSS}" "linux_${ARCH_SSS}")"
 
-    unpack_archive_from_url "${NS_SSS}.${ARCH_SSS}" "$(gh_release_asset_url_by_arch "${REPO_SSS}" "linux_${ARCH_SSS}")" "0"
+    unpack_archive_from_url "${NS_SSS}.${ARCH_SSS}" "${RES_SSS}" "0"
     \cp -af "${TMP}/${NS_SSS}.${ARCH_SSS}/outline-ss-server" "third_parties/${C_ARCH}/outline-ss-server/linux/outline-ss-server"
 
     # Download prometheus
     ARCH_PROM="$(remap_arch "${C_ARCH}" amd64 arm64 armv7 armv6)"
+    [[ -z "${RES_PROM}" ]] && RES_PROM="$(gh_release_asset_url_by_arch "${REPO_PROM}" "linux-${ARCH_PROM}")"
 
-    unpack_archive_from_url "${NS_PROM}.${ARCH_PROM}" "$(gh_release_asset_url_by_arch "${REPO_PROM}" "linux-${ARCH_PROM}")" "1"
+    unpack_archive_from_url "${NS_PROM}.${ARCH_PROM}" "${RES_PROM}" "1"
     \cp -af "${TMP}/${NS_PROM}.${ARCH_PROM}/prometheus" "third_parties/${C_ARCH}/prometheus/linux/prometheus"
 done
-
-exit 0
 
 # Modify build environment
 sed -i -e \
