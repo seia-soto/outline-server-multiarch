@@ -94,22 +94,22 @@ for C_ARCH in ${ARCH//,/ }
 do
     # Copy original third_party
     mkdir -p "third_parties/${C_ARCH}"
-    \cp -rf "third_party/." "third_parties/${C_ARCH}"
+    \cp -af "third_party/." "third_parties/${C_ARCH}"
 
     # Download outline-ss-server
-    ARCH_SSS="$(remap_arch "${C_ARCH}" linux_x86_64 linux_arm64 linux_armv7 linux_armv6)"
+    ARCH_SSS="$(remap_arch "${C_ARCH}" x86_64 arm64 armv7 armv6)"
 
-    unpack_archive_from_url "${NS_SSS}" "$(gh_release_asset_url_by_arch "${REPO_SSS}" "linux_${ARCH_SSS}")" "0"
-    \cp -f "${TMP}/${NS_SSS}/outline-ss-server" "third_parties/${C_ARCH}/outline-ss-server/linux/outline-ss-server"
-    chmod +x "third_parties/${C_ARCH}/outline-ss-server/linux/outline-ss-server"
+    unpack_archive_from_url "${NS_SSS}.${ARCH_SSS}" "$(gh_release_asset_url_by_arch "${REPO_SSS}" "linux_${ARCH_SSS}")" "0"
+    \cp -af "${TMP}/${NS_SSS}.${ARCH_SSS}/outline-ss-server" "third_parties/${C_ARCH}/outline-ss-server/linux/outline-ss-server"
 
     # Download prometheus
-    ARCH_PROM="$(remap_arch "${C_ARCH}" linux-amd64 linux-arm64 linux-armv7 linux-armv6)"
+    ARCH_PROM="$(remap_arch "${C_ARCH}" amd64 arm64 armv7 armv6)"
 
-    unpack_archive_from_url "${NS_PROM}" "$(gh_release_asset_url_by_arch "${REPO_PROM}" "linux-${ARCH_PROM}")" "1"
-    \cp -f "${TMP}/${NS_PROM}/prometheus" "third_parties/${C_ARCH}/prometheus/linux/prometheus"
-    chmod +x "third_parties/${C_ARCH}/prometheus/linux/prometheus"
+    unpack_archive_from_url "${NS_PROM}.${ARCH_PROM}" "$(gh_release_asset_url_by_arch "${REPO_PROM}" "linux-${ARCH_PROM}")" "1"
+    \cp -af "${TMP}/${NS_PROM}.${ARCH_PROM}/prometheus" "third_parties/${C_ARCH}/prometheus/linux/prometheus"
 done
+
+exit 0
 
 # Modify build environment
 sed -i -e \
