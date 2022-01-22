@@ -90,9 +90,6 @@ fi
 git checkout "${CHECKPOINT}"
 
 # Multi arch build
-RES_SSS=""
-RES_PROM=""
-
 for C_ARCH in ${ARCH//,/ }
 do
     # Make required directories
@@ -100,14 +97,14 @@ do
 
     # Download outline-ss-server
     ARCH_SSS="$(remap_arch "${C_ARCH}" x86_64 arm64 armv7 armv6)"
-    [[ -z "${RES_SSS}" ]] && RES_SSS="$(gh_release_asset_url_by_arch "${REPO_SSS}" "linux_${ARCH_SSS}")"
+    RES_SSS="$(gh_release_asset_url_by_arch "${REPO_SSS}" "linux_${ARCH_SSS}")"
 
     unpack_archive_from_url "${NS_SSS}.${ARCH_SSS}" "${RES_SSS}" "0"
     \cp -af "${TMP}/${NS_SSS}.${ARCH_SSS}/outline-ss-server" "third_parties/${C_ARCH}/outline-ss-server/linux/outline-ss-server"
 
     # Download prometheus
     ARCH_PROM="$(remap_arch "${C_ARCH}" amd64 arm64 armv7 armv6)"
-    [[ -z "${RES_PROM}" ]] && RES_PROM="$(gh_release_asset_url_by_arch "${REPO_PROM}" "linux-${ARCH_PROM}")"
+    RES_PROM="$(gh_release_asset_url_by_arch "${REPO_PROM}" "linux-${ARCH_PROM}")"
 
     unpack_archive_from_url "${NS_PROM}.${ARCH_PROM}" "${RES_PROM}" "1"
     \cp -af "${TMP}/${NS_PROM}.${ARCH_PROM}/prometheus" "third_parties/${C_ARCH}/prometheus/linux/prometheus"
@@ -140,4 +137,4 @@ fi
 cd ..
 
 rm -rf "${TMP}"
-# rm -rf "${NS_BASE}"
+rm -rf "${NS_BASE}"
