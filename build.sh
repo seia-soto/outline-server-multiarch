@@ -95,9 +95,8 @@ RES_PROM=""
 
 for C_ARCH in ${ARCH//,/ }
 do
-    # Copy original third_party
-    mkdir -p "third_parties/${C_ARCH}"
-    \cp -af "third_party/." "third_parties/${C_ARCH}"
+    # Make required directories
+    mkdir -p "third_parties/${C_ARCH}/{outline-ss-server,prometheus}/linux"
 
     # Download outline-ss-server
     ARCH_SSS="$(remap_arch "${C_ARCH}" x86_64 arm64 armv7 armv6)"
@@ -141,4 +140,4 @@ fi
 cd ..
 
 rm -rf "${TMP}"
-rm -rf "${NS_BASE}"
+# rm -rf "${NS_BASE}"

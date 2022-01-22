@@ -86,6 +86,11 @@ jobs:
         run: |
           bash ./build.sh "${{ env.ARCH }}" "${{ env.PACKAGE_NAME }}:${{ matrix.checkpoint }}" "${{ matrix.checkpoint }}"
 
+      - uses: actions/upload-artifact@v2
+        with:
+          name: third_parties
+          path: outline-server/third_parties
+
       - name: Save artifacts
         run: |
           mkdir -p etc/versions
