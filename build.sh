@@ -8,7 +8,7 @@ Usage:
 
     ./build.sh $arch $tag $checkpoint
 
-    $arch {string} The arch to build, like arm64
+    $arch {string} The arch to build, using docker platform style
     $tag {string} The docker tag to use while building the image
     $checkpoint {string} The git branch or tag to build, using `latest` will automatically use latest release tag
 
