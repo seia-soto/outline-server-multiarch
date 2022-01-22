@@ -92,22 +92,23 @@ git checkout "${CHECKPOINT}"
 # Multi arch build
 for C_ARCH in ${ARCH//,/ }
 do
-    # Make required directories
-    mkdir -p "third_parties/${C_ARCH}/{outline-ss-server,prometheus}/linux"
-
     # Download outline-ss-server
     ARCH_SSS="$(remap_arch "${C_ARCH}" x86_64 arm64 armv7 armv6)"
     RES_SSS="$(gh_release_asset_url_by_arch "${REPO_SSS}" "linux_${ARCH_SSS}")"
 
     unpack_archive_from_url "${NS_SSS}.${ARCH_SSS}" "${RES_SSS}" "0"
-    \cp -af "${TMP}/${NS_SSS}.${ARCH_SSS}/outline-ss-server" "third_parties/${C_ARCH}/outline-ss-server/linux/outline-ss-server"
+
+    mkdir -p "third_parties/${C_ARCH}/outline-ss-server/linux"
+    mv "${TMP}/${NS_SSS}.${ARCH_SSS}/outline-ss-server" "third_parties/${C_ARCH}/outline-ss-server/linux"
 
     # Download prometheus
     ARCH_PROM="$(remap_arch "${C_ARCH}" amd64 arm64 armv7 armv6)"
     RES_PROM="$(gh_release_asset_url_by_arch "${REPO_PROM}" "linux-${ARCH_PROM}")"
 
     unpack_archive_from_url "${NS_PROM}.${ARCH_PROM}" "${RES_PROM}" "1"
-    \cp -af "${TMP}/${NS_PROM}.${ARCH_PROM}/prometheus" "third_parties/${C_ARCH}/prometheus/linux/prometheus"
+
+    mkdir -p "third_parties/${C_ARCH}/prometheus/linux"
+    mv "${TMP}/${NS_PROM}.${ARCH_PROM}/prometheus" "third_parties/${C_ARCH}/prometheus/linux"
 done
 
 # Modify build environment
