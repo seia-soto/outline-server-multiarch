@@ -8,6 +8,8 @@ on:
   push:
     paths:
       - '.github/**'
+      - 'etc/**'
+      - 'extra/**'
       - '**.sh'
   schedule:
     - cron: '0 0 * * *'
