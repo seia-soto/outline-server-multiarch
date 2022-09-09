@@ -19,7 +19,7 @@ export SB_IMAGE="ghcr.io/seia-soto/shadowbox:master"
 export SB_IMAGE="ghcr.io/seia-soto/shadowbox:latest"
 
 # run install script
-curl -sL "https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/src/server_manager/install_scripts/install_server.sh" | sed -e '/Unsupported machine type/{N;d;}' | bash
+curl -sL "https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/src/server_manager/install_scripts/install_server.sh" | sed '/local MACHINE_TYPE/,/fi/{d}' | bash
 ```
 
 ### Local build
@@ -71,7 +71,7 @@ CHECKPOINT="latest" # or `master`
 bash ./build.sh "${PLATFORM}" "${SB_IMAGE}" "${CHECKPOINT}"
 
 # run install script
-curl -sL "https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/src/server_manager/install_scripts/install_server.sh" | sed -e '/Unsupported machine type/{N;d;}' | bash
+curl -sL "https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/src/server_manager/install_scripts/install_server.sh" | sed '/local MACHINE_TYPE/,/fi/{d}' | bash
 ```
 
 ### Troubleshooting
@@ -81,7 +81,7 @@ curl -sL "https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/sr
 You can use `sed -e '/Unsupported machine type/{N;d;}'` to remove lines.
 
 ```bash
-curl -sL "https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/src/server_manager/install_scripts/install_server.sh" | sed -e '/Unsupported machine type/{N;d;}' | bash
+curl -sL "https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/src/server_manager/install_scripts/install_server.sh" | sed '/local MACHINE_TYPE/,/fi/{d}' | bash
 ```
 
 # LICENSE
