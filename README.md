@@ -78,7 +78,7 @@ curl -sL "https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/sr
 
 #### `Unsupported machine type: ${MACHINE_TYPE}. Please run this script on a x86_64 machine.`
 
-You can use `sed -e '/Unsupported machine type/{N;d;}'` to remove lines.
+You can use `sed '/local MACHINE_TYPE/,/fi/{d}'` to remove lines.
 
 ```bash
 curl -sL "https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/src/server_manager/install_scripts/install_server.sh" | sed '/local MACHINE_TYPE/,/fi/{d}' | bash
