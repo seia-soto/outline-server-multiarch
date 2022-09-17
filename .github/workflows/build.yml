@@ -32,10 +32,10 @@ jobs:
         run: |
           if [[ "latest-${{steps.remote.outputs.tag}}" != "${{steps.local.outputs.tag}}" ]];
             echo ::set-output name=latest::"true"
-          fi;
+          fi
           if [[ "release-${{steps.remote.outputs.release}}" != "${{steps.local.outputs.release}}" ]];
             echo ::set-output name=release::"true"
-          fi;
+          fi
   build_master:
     needs: [version]
     runs-on: ubuntu-latest
