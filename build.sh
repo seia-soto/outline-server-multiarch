@@ -82,7 +82,7 @@ git clone "https://github.com/${REPO_BASE}.git" "${NS_BASE}"
 # Go to repo and checkout to latest release
 cd "${NS_BASE}"
 
-if [[ -z "${CHECKPOINT}" || "${CHECKPOINT}" == "latest" ]]; then
+if [[ -z "${CHECKPOINT}" ]]; then
     CHECKPOINT="tags/$(gh_releases "${REPO_BASE}" | jq -r '.tag_name')"
     USE_LEGACY_INSTALL="true"
 fi

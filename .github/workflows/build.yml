@@ -1,0 +1,144 @@
+name: Build
+env:
+  PACKAGE_NAME: 'ghcr.io/seia-soto/shadowbox'
+  ARCH: 'linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6'
+on:
+  push:
+  schedule:
+    - cron: '0 0 * * *'
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      local_release: ${{steps.local_release.outputs.version}}
+      local_tag: ${{steps.local_tag.outputs.version}}
+      remote_release: ${{steps.remote_release.outputs.version}}
+      remote_tag: ${{steps.remote_tag.outputs.version}}
+    steps:
+      - name: Get remote release
+        id: remote_release
+        run: |
+          REMOTE="$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/releases | jq -r '[.[] | select(.prerelease == false)][0].tag_name')"
+
+          echo ::set-output name=version::"release-$REMOTE"
+      - name: Get remote tag
+        id: remote_tag
+        run: |
+          REMOTE="$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/tags | jq -r '.[0].name')"
+
+          echo ::set-output name=version::"latest-$REMOTE"
+      - name: Get local release
+        id: local_release
+        run: |
+          echo ::set-output name=version::$( \
+            curl -sL "https://api.github.com/repos/${{github.repository}}/releases" | \
+            jq -r '[.[] | select(.tag_name | startswith("latest-"))][0].tag_name'
+          )
+      - name: Get local tag
+        id: local_tag
+        run: |
+          echo ::set-output name=version::$( \
+            curl -sL "https://api.github.com/repos/${{github.repository}}/releases" | \
+            jq -r '[.[] | select(.tag_name | startswith("release-"))][0].tag_name'
+          )
+  build_master:
+    needs: [version]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{github.repository_owner}}
+          password: ${{secrets.GITHUB_TOKEN}}
+      - name: Build and push
+        run: |
+          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:master" "master"
+  build_latest:
+    needs: [version]
+    runs-on: ubuntu-latest
+    if: "latest-${{needs.version.outputs.remote_tag}}" != needs.version.outputs.local_tag
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{github.repository_owner}}
+          password: ${{secrets.GITHUB_TOKEN}}
+      - name: Build and push
+        run: |
+          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:latest" "${{needs.version.outputs.remote_tag}}"
+      - name: Conditional release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          tag_name: "latest-${{needs.version.outputs.remote_tag}}"
+          release_name: "latest-${{needs.version.outputs.remote_tag}}"
+          body: |
+            This release is for identification use of CI script.
+            Please, read README to deploy this package.
+          draft: false
+          prerelease: true
+  build_release:
+    needs: [version]
+    runs-on: ubuntu-latest
+    if: "release-${{needs.version.outputs.remote_release}}" != needs.version.outputs.local_release
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 12
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: all
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{github.repository_owner}}
+          password: ${{secrets.GITHUB_TOKEN}}
+      - name: Build and push
+        run: |
+          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:release" "${{needs.version.outputs.remote_release}}"
+      - name: Conditional release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          tag_name: "release-${{needs.version.outputs.remote_release}}"
+          release_name: "release-${{needs.version.outputs.remote_release}}"
+          body: |
+            This release is for identification use of CI script.
+            Please, read README to deploy this package.
+          draft: false
+          prerelease: false
