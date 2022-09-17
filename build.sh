@@ -82,7 +82,7 @@ git clone "https://github.com/${REPO_BASE}.git" "${NS_BASE}"
 # Go to repo and checkout to latest release
 cd "${NS_BASE}"
 
-if [[ -z "${CHECKPOINT}" ]]; then
+if [[ -z "${CHECKPOINT}" || "${CHECKPOINT}" == "release" ]]; then
     CHECKPOINT="tags/$(gh_releases "${REPO_BASE}" | jq -r '.tag_name')"
     USE_LEGACY_INSTALL="true"
 fi
@@ -131,7 +131,7 @@ else
 
     \cp -f "../extra/scripts/build.action.sh" "src/shadowbox/docker/build.action.sh"
 
-    npm run action shadowbox/docker/build
+    npm run do shadowbox/docker/build
 fi
 
 # Clean-up
