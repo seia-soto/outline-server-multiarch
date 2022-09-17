@@ -5,7 +5,7 @@ The multi-arch distribution of [Jigsaw's Outline-Server](https://github.com/Jigs
 | Version | Update Interval                              | Target          | Supported OS/Arch                                    |
 |---------|----------------------------------------------|-----------------|------------------------------------------------------|
 | master  | daily                                        | upstream/master | linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6 |
-| latest  | checked daily, released as upstream tags     | Latest release  | linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6 |
+| latest  | checked daily, released as upstream tags     | Latest tag      | linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6 |
 | release | checked daily, released as upstream releases | Latest release  | linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6 |
 
 ## Usage
