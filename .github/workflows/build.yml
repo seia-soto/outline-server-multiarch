@@ -97,8 +97,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          tag_name: latest-${{needs.version.outputs.remote_tag}}
-          release_name: latest-${{needs.version.outputs.remote_tag}}
+          tag_name: ${{needs.version.outputs.remote_tag}}
+          release_name: ${{needs.version.outputs.remote_tag}}
           body: |
             This release is for identification use of CI script.
             Please, read README to deploy this package.
@@ -135,8 +135,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          tag_name: latest-${{needs.version.outputs.remote_release}}
-          release_name: latest-${{needs.version.outputs.remote_release}}
+          tag_name: ${{needs.version.outputs.remote_release}}
+          release_name: ${{needs.version.outputs.remote_release}}
           body: |
             This release is for identification use of CI script.
             Please, read README to deploy this package.
