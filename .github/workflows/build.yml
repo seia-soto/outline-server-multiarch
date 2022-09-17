@@ -30,8 +30,12 @@ jobs:
       - name: Test
         id: test
         run: |
-          echo "::set-output name=latest::${{"latest-${{steps.remote.outputs.tag}}" != "${{steps.local.outputs.tag}}"}}"
-          echo "::set-output name=release::${{"release-${{steps.remote.outputs.release}}" != "${{steps.local.outputs.release}}"}}"
+          if [[ "latest-${{steps.remote.outputs.tag}}" != "${{steps.local.outputs.tag}}" ]];
+            echo "::set-output name=latest::true"
+          fi
+          if [[ "release-${{steps.remote.outputs.release}}" != "${{steps.local.outputs.release}}" ]];
+            echo "::set-output name=release::true"
+          fi
   build_master:
     needs: [version]
     runs-on: ubuntu-latest
