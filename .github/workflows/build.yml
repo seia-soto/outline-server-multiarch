@@ -31,9 +31,11 @@ jobs:
         id: test
         run: |
           if [[ "latest-${{steps.remote.outputs.tag}}" != "${{steps.local.outputs.tag}}" ]];
+          then
             echo "::set-output name=latest::true"
           fi
           if [[ "release-${{steps.remote.outputs.release}}" != "${{steps.local.outputs.release}}" ]];
+          then
             echo "::set-output name=release::true"
           fi
   build_master:
