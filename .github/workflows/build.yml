@@ -40,8 +40,8 @@ jobs:
         id: local_tag
         run: |
           echo ::set-output name=version::$( \
-            curl -sL "https://api.github.com/repos/${{github.repository}}/tags" | \
-            jq -r '[.[] | select(.tag_name | startswith("release-"))][0].name'
+            curl -sL "https://api.github.com/repos/${{github.repository}}/releases" | \
+            jq -r '[.[] | select(.tag_name | startswith("release-"))][0].tag_name'
           )
   build_master:
     needs: [version]
@@ -99,8 +99,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          tag_name: latest-${{needs.check.test_release.version}}
-          release_name: latest-${{needs.check.test_release.version}}
+          tag_name: latest-${{needs.version.outputs.remote_tag}}
+          release_name: latest-${{needs.version.outputs.remote_tag}}
           body: |
             This release is for identification use of CI script.
             Please, read README to deploy this package.
@@ -137,8 +137,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          tag_name: release-${{needs.check.test_release.version}}
-          release_name: release-${{needs.check.test_release.version}}
+          tag_name: latest-${{needs.version.outputs.remote_release}}
+          release_name: latest-${{needs.version.outputs.remote_release}}
           body: |
             This release is for identification use of CI script.
             Please, read README to deploy this package.
