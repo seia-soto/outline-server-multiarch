@@ -17,7 +17,7 @@ To install outline-server on your server using this docker image, paste followin
 export SB_IMAGE="ghcr.io/seia-soto/shadowbox:master"
 
 # stable release, updated infrequently
-export SB_IMAGE="ghcr.io/seia-soto/shadowbox:latest"
+export SB_IMAGE="ghcr.io/seia-soto/shadowbox:release"
 
 # latest release, updated irregularly
 export SB_IMAGE="ghcr.io/seia-soto/shadowbox:latest"
