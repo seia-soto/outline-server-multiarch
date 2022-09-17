@@ -65,11 +65,11 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: Build and push
         run: |
-          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:${{matrix.CHECKPOINT}}" "${{matrix.CHECKPOINT}}"
+          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:master" "master"
   build_latest:
     needs: [version]
     runs-on: ubuntu-latest
-    if: needs.version.outputs.remote_tag != needs.version.outputs.local_tag
+    if: "latest-${{needs.version.outputs.remote_tag}}" != needs.version.outputs.local_tag
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -91,14 +91,14 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: Build and push
         run: |
-          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:${{matrix.CHECKPOINT}}" "${{matrix.CHECKPOINT}}"
+          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:latest" "${{needs.version.outputs.remote_tag}}"
       - name: Conditional release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          tag_name: ${{needs.version.outputs.remote_tag}}
-          release_name: ${{needs.version.outputs.remote_tag}}
+          tag_name: "latest-${{needs.version.outputs.remote_tag}}"
+          release_name: "latest-${{needs.version.outputs.remote_tag}}"
           body: |
             This release is for identification use of CI script.
             Please, read README to deploy this package.
@@ -107,7 +107,7 @@ jobs:
   build_release:
     needs: [version]
     runs-on: ubuntu-latest
-    if: needs.version.outputs.remote_release != needs.version.outputs.local_release
+    if: "release-${{needs.version.outputs.remote_release}}" != needs.version.outputs.local_release
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -129,14 +129,14 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: Build and push
         run: |
-          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:${{matrix.CHECKPOINT}}" "${{matrix.CHECKPOINT}}"
+          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:release" "${{needs.version.outputs.remote_release}}"
       - name: Conditional release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          tag_name: ${{needs.version.outputs.remote_release}}
-          release_name: ${{needs.version.outputs.remote_release}}
+          tag_name: "release-${{needs.version.outputs.remote_release}}"
+          release_name: "release-${{needs.version.outputs.remote_release}}"
           body: |
             This release is for identification use of CI script.
             Please, read README to deploy this package.
