@@ -14,6 +14,8 @@ jobs:
       local_tag: ${{steps.local_tag.outputs.version}}
       remote_release: ${{steps.remote_release.outputs.version}}
       remote_tag: ${{steps.remote_tag.outputs.version}}
+      is_release_build_required: "release-${{steps.remote_release.outputs.version}}" == "${{steps.local_release.outputs.version}}"
+      is_latest_build_required: "latest-${{steps.remote_tag.outputs.version}}" == "${{steps.remote_tag.outputs.version}}"
     steps:
       - name: Get remote release
         id: remote_release
@@ -69,7 +71,7 @@ jobs:
   build_latest:
     needs: [version]
     runs-on: ubuntu-latest
-    if: "latest-${{needs.version.outputs.remote_tag}}" != needs.version.outputs.local_tag
+    if: needs.version.outputs.is_latest_build_required == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -107,7 +109,7 @@ jobs:
   build_release:
     needs: [version]
     runs-on: ubuntu-latest
-    if: "release-${{needs.version.outputs.remote_release}}" != needs.version.outputs.local_release
+    if: needs.version.outputs.is_release_build_required == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
