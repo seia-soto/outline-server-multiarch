@@ -21,7 +21,7 @@ jobs:
         id: remote
         run: |
           echo ::set-output name=release::"$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/releases | jq -r '[.[] | select(.prerelease == false)][0].tag_name')"
-          echo ::set-output name=tag:"$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/tags | jq -r '.[0].name')"
+          echo ::set-output name=tag::"$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/tags | jq -r '.[0].name')"
       - name: Get local release
         id: local
         run: |
@@ -31,10 +31,10 @@ jobs:
         id: test
         run: |
           if [[ "latest-${{steps.remote.outputs.tag}}" != "${{steps.local.outputs.tag}}" ]];
-            echo ::set-output name=latest::'true'
+            echo ::set-output name=latest::"true"
           fi;
           if [[ "release-${{steps.remote.outputs.release}}" != "${{steps.local.outputs.release}}" ]];
-            echo ::set-output name=release::'true'
+            echo ::set-output name=release::"true"
           fi;
   build_master:
     needs: [version]
