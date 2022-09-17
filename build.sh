@@ -6,11 +6,12 @@ set -x
 
 Usage:
 
-    ./build.sh $arch $tag $checkpoint
+    ./build.sh $arch $tag $checkpoint $use_legacy_install
 
     $arch {string} The arch to build, using docker platform style
     $tag {string} The docker tag to use while building the image
-    $checkpoint {string} The git branch or tag to build, using `latest` will automatically use latest release tag
+    $checkpoint {string} The git branch or tag to checkout on Jigsaw-Code/Outline-Server
+    $use_legacy_install {boolean} Set as true to build recent versions of outline-server using Node.JS v16 since v1.10.0
 
 About:
 
@@ -33,8 +34,7 @@ TMP=$(mktemp -d)
 ARCH=${1}
 TAG=${2}
 CHECKPOINT=${3}
-
-USE_LEGACY_INSTALL="false"
+USE_LEGACY_INSTALL=${4}
 
 export DOCKER_PLATFORMS="${ARCH}"
 
@@ -81,11 +81,6 @@ git clone "https://github.com/${REPO_BASE}.git" "${NS_BASE}"
 
 # Go to repo and checkout to latest release
 cd "${NS_BASE}"
-
-if [[ -z "${CHECKPOINT}" || "${CHECKPOINT}" == "release" ]]; then
-    CHECKPOINT="tags/$(gh_releases "${REPO_BASE}" | jq -r '.tag_name')"
-    USE_LEGACY_INSTALL="true"
-fi
 
 git checkout "${CHECKPOINT}"
 
