@@ -72,7 +72,7 @@ jobs:
         uses: actions/checkout@v2
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 12
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v1
         with:
@@ -88,7 +88,7 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: Build and push
         run: |
-          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:latest" "${{needs.version.outputs.remote_tag}}" "false"
+          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:latest" "${{needs.version.outputs.remote_tag}}" "true"
       - name: Conditional release
         uses: actions/create-release@v1
         env:

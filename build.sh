@@ -11,7 +11,7 @@ Usage:
     $arch {string} The arch to build, using docker platform style
     $tag {string} The docker tag to use while building the image
     $checkpoint {string} The git branch or tag to checkout on Jigsaw-Code/Outline-Server
-    $use_legacy_install {boolean} Set as true to build recent versions of outline-server using Node.JS v16 since v1.10.0
+    $use_legacy_install {boolean} Set as true to build recent versions of outline-server using Node.JS v16 (likely on master branch)
 
 About:
 
@@ -81,6 +81,11 @@ git clone "https://github.com/${REPO_BASE}.git" "${NS_BASE}"
 
 # Go to repo and checkout to latest release
 cd "${NS_BASE}"
+
+# Use patch latest
+if [[ "${CHECKPOINT}" == "latest" ]]; then
+    CHECKPOINT="$(git describe --tags --abbrev=0)"
+fi
 
 git checkout "${CHECKPOINT}"
 

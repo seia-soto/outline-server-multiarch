@@ -48,11 +48,12 @@ cd outline-server-multiarch
 
 Usage:
 
-    ./build.sh $arch $tag $checkpoint
+    ./build.sh $arch $tag $checkpoint $use_legacy_install
 
     $arch {string} The arch to build, using docker platform style
     $tag {string} The docker tag to use while building the image
-    $checkpoint {string} The git branch or tag to build, using `latest` will automatically use latest release tag
+    $checkpoint {string} The git branch or tag to checkout on Jigsaw-Code/Outline-Server
+    $use_legacy_install {boolean} Set as true to build recent versions of outline-server using Node.JS v16 (likely on master branch)
 
 About:
 
@@ -65,10 +66,10 @@ About:
 export SB_IMAGE="shadowbox-local"
 
 PLATFORM="linux/amd64" # use one of linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6, or all
-CHECKPOINT="latest" # or `master`
+CHECKPOINT="latest" # use latest for latest tag or `master`
 
 # build latest
-bash ./build.sh "${PLATFORM}" "${SB_IMAGE}" "${CHECKPOINT}"
+bash ./build.sh "${PLATFORM}" "${SB_IMAGE}" "${CHECKPOINT}" "true"
 
 # run install script
 curl -sL "https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/src/server_manager/install_scripts/install_server.sh" | sed '/local MACHINE_TYPE/,/fi/{d}' | bash
