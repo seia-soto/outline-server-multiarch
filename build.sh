@@ -126,7 +126,7 @@ else
 
     \cp -f "../extra/scripts/build.action.sh" "src/shadowbox/docker/build.action.sh"
 
-    npm run do shadowbox/docker/build
+    npm run action shadowbox/docker/build
 fi
 
 # Clean-up

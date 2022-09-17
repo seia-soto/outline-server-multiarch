@@ -40,7 +40,7 @@ jobs:
           fi
   build_master:
     needs: [version]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -65,7 +65,7 @@ jobs:
           bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:master" "master" "false"
   build_latest:
     needs: [version]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     if: needs.version.outputs.is_latest_build_required == 'true'
     steps:
       - name: Checkout repository
@@ -103,7 +103,7 @@ jobs:
           prerelease: true
   build_release:
     needs: [version]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     if: needs.version.outputs.is_release_build_required == 'true'
     steps:
       - name: Checkout repository
