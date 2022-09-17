@@ -27,7 +27,7 @@ jobs:
         run: |
           echo ::set-output name=version::$( \
             curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/tags | \
-            jq -r '[.[] | select(.prerelease == false)][0].name'
+            jq -r '.[0].name'
           )
       - name: Get local release
         id: local_release
