@@ -10,39 +10,28 @@ jobs:
   version:
     runs-on: ubuntu-latest
     outputs:
-      local_release: ${{steps.local_release.outputs.version}}
-      local_tag: ${{steps.local_tag.outputs.version}}
-      remote_release: ${{steps.remote_release.outputs.version}}
-      remote_tag: ${{steps.remote_tag.outputs.version}}
-      is_release_build_required: ${{"release-${steps.remote_release.outputs.version}" == "${steps.local_release.outputs.version}"}}
-      is_latest_build_required: ${{"latest-${steps.remote_tag.outputs.version}" == "${steps.remote_tag.outputs.version}"}}
+      local_release: ${{steps.local.outputs.release}}
+      local_tag: ${{steps.local.outputs.tag}}
+      remote_release: ${{steps.remote.outputs.release}}
+      remote_tag: ${{steps.remote.outputs.tag}}
+      is_release_build_required: ${{steps.test.outputs.release}}
+      is_latest_build_required: ${{steps.test.outputs.latest}}
     steps:
-      - name: Get remote release
-        id: remote_release
+      - name: Get remote version
+        id: remote
         run: |
-          REMOTE="$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/releases | jq -r '[.[] | select(.prerelease == false)][0].tag_name')"
-
-          echo ::set-output name=version::"release-$REMOTE"
-      - name: Get remote tag
-        id: remote_tag
-        run: |
-          REMOTE="$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/tags | jq -r '.[0].name')"
-
-          echo ::set-output name=version::"latest-$REMOTE"
+          echo ::set-output name=release::"$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/releases | jq -r '[.[] | select(.prerelease == false)][0].tag_name')"
+          echo ::set-output name=tag:"$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/tags | jq -r '.[0].name')"
       - name: Get local release
-        id: local_release
+        id: local
         run: |
-          echo ::set-output name=version::$( \
-            curl -sL "https://api.github.com/repos/${{github.repository}}/releases" | \
-            jq -r '[.[] | select(.tag_name | startswith("latest-"))][0].tag_name'
-          )
-      - name: Get local tag
-        id: local_tag
+          echo ::set-output name=release::"$(curl -sL "https://api.github.com/repos/${{github.repository}}/releases" | jq -r '[.[] | select(.tag_name | startswith("latest-"))][0].tag_name')"
+          echo ::set-output name=tag::"$(curl -sL "https://api.github.com/repos/${{github.repository}}/releases" | jq -r '[.[] | select(.tag_name | startswith("release-"))][0].tag_name')"
+      - name: Test
+        id: test
         run: |
-          echo ::set-output name=version::$( \
-            curl -sL "https://api.github.com/repos/${{github.repository}}/releases" | \
-            jq -r '[.[] | select(.tag_name | startswith("release-"))][0].tag_name'
-          )
+          echo ::set-output name=latest::"$("latest-${{steps.remote.outputs.tag}}" == "${{steps.local.outputs.tag}}")"
+          echo ::set-output name=release::"$("release-${{steps.remote.outputs.release}}" == "${{steps.local.outputs.release}}")"
   build_master:
     needs: [version]
     runs-on: ubuntu-latest
