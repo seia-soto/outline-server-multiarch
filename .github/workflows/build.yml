@@ -14,8 +14,8 @@ jobs:
       local_tag: ${{steps.local_tag.outputs.version}}
       remote_release: ${{steps.remote_release.outputs.version}}
       remote_tag: ${{steps.remote_tag.outputs.version}}
-      is_release_build_required: "release-${{steps.remote_release.outputs.version}}" == "${{steps.local_release.outputs.version}}"
-      is_latest_build_required: "latest-${{steps.remote_tag.outputs.version}}" == "${{steps.remote_tag.outputs.version}}"
+      is_release_build_required: ${{"release-${steps.remote_release.outputs.version}" == "${steps.local_release.outputs.version}"}}
+      is_latest_build_required: ${{"latest-${steps.remote_tag.outputs.version}" == "${steps.remote_tag.outputs.version}"}}
     steps:
       - name: Get remote release
         id: remote_release
