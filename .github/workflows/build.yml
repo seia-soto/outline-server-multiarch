@@ -18,13 +18,13 @@ jobs:
       - name: Get remote release
         id: remote_release
         run: |
-          local REMOTE="$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/releases | jq -r '[.[] | select(.prerelease == false)][0].tag_name')"
+          REMOTE="$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/releases | jq -r '[.[] | select(.prerelease == false)][0].tag_name')"
 
           echo ::set-output name=version::"release-$REMOTE"
       - name: Get remote tag
         id: remote_tag
         run: |
-          local REMOTE="$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/tags | jq -r '.[0].name')"
+          REMOTE="$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/tags | jq -r '.[0].name')"
 
           echo ::set-output name=version::"latest-$REMOTE"
       - name: Get local release
