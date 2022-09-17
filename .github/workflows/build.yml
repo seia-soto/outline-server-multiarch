@@ -62,7 +62,7 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: Build and push
         run: |
-          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:master" "master" "true"
+          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:master" "master" "false"
   build_latest:
     needs: [version]
     runs-on: ubuntu-latest
@@ -88,7 +88,7 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: Build and push
         run: |
-          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:latest" "${{needs.version.outputs.remote_tag}}" "true"
+          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:latest" "${{needs.version.outputs.remote_tag}}" "false"
       - name: Conditional release
         uses: actions/create-release@v1
         env:
@@ -126,7 +126,7 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: Build and push
         run: |
-          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:release" "${{needs.version.outputs.remote_release}}" "false"
+          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:release" "${{needs.version.outputs.remote_release}}" "true"
       - name: Conditional release
         uses: actions/create-release@v1
         env:
