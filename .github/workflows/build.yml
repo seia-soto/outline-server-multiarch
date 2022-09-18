@@ -3,6 +3,7 @@ env:
   PACKAGE_NAME: 'ghcr.io/seia-soto/shadowbox'
   ARCH: 'linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6'
 on:
+  push:
   schedule:
     - cron: '0 0 * * *'
 jobs:
