@@ -24,7 +24,7 @@ jobs:
       - name: Get local release
         id: local
         run: |
-          echo ::set-output name=tag::"$(curl -sL "https://api.github.com/repos/${{github.repository}}/tags" | jq -r '[.[] | select(.tag_name | startswith("latest-"))][0].name')"
+          echo ::set-output name=tag::"$(curl -sL "https://api.github.com/repos/${{github.repository}}/releases" | jq -r '[.[] | select(.tag_name | startswith("latest-"))][0].name')"
           echo ::set-output name=release::"$(curl -sL "https://api.github.com/repos/${{github.repository}}/releases" | jq -r '[.[] | select(.tag_name | startswith("release-"))][0].tag_name')"
       - name: Test
         id: test
