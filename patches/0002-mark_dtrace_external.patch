@@ -1,0 +1,12 @@
+diff --git a/src/shadowbox/webpack.config.js b/src/shadowbox/webpack.config.js
+index dd1d9cbb..63aca275 100644
+--- a/src/shadowbox/webpack.config.js
++++ b/src/shadowbox/webpack.config.js
+@@ -35,6 +35,7 @@ const config = {
+     new webpack.DefinePlugin({'global.GENTLY': false}),
+   ],
+   resolve: {extensions: ['.tsx', '.ts', '.js']},
++  externals: ['dtrace-provider']
+ };
+ 
+ module.exports = config;

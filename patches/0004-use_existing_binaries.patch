@@ -1,0 +1,26 @@
+diff --git a/src/shadowbox/server/build.action.sh b/src/shadowbox/server/build.action.sh
+index 66299466..a611ab1e 100755
+--- a/src/shadowbox/server/build.action.sh
++++ b/src/shadowbox/server/build.action.sh
+@@ -21,19 +21,10 @@ mkdir -p "${OUT_DIR}"
+ webpack --config=src/shadowbox/webpack.config.js ${BUILD_ENV:+--mode="${BUILD_ENV}"}
+ 
+ # Install third_party dependencies
+-readonly OS="$([[ "$(uname)" == "Darwin" ]] && echo "macos" || echo "linux")"
+ readonly BIN_DIR="${OUT_DIR}/bin"
+ mkdir -p "${BIN_DIR}"
+-{
+-  cd "${ROOT_DIR}/third_party/prometheus"
+-  make "bin/${OS}/prometheus"
+-  cp "bin/${OS}/prometheus" "${BIN_DIR}/"
+-}
+-{
+-  cd "${ROOT_DIR}/third_party/outline-ss-server"
+-  make "bin/${OS}/outline-ss-server"
+-  cp "bin/${OS}/outline-ss-server" "${BIN_DIR}/"
+-}
++cp "${ROOT_DIR}/third_party/prometheus/prometheus" "${BIN_DIR}/"
++cp "${ROOT_DIR}/third_party/outline-ss-server/outline-ss-server" "${BIN_DIR}/"
+ 
+ # Copy shadowbox package.json
+ cp "${ROOT_DIR}/src/shadowbox/package.json" "${OUT_DIR}/"

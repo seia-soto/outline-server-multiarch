@@ -10,33 +10,26 @@ jobs:
   version:
     runs-on: ubuntu-latest
     outputs:
-      local_release: ${{steps.local.outputs.release}}
       local_tag: ${{steps.local.outputs.tag}}
-      remote_release: ${{steps.remote.outputs.release}}
       remote_tag: ${{steps.remote.outputs.tag}}
-      is_release_build_required: ${{steps.test.outputs.release}}
       is_latest_build_required: ${{steps.test.outputs.latest}}
     steps:
       - name: Get remote version
         id: remote
         run: |
-          echo ::set-output name=tag::"$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/tags | jq -r '.[0].name')"
-          echo ::set-output name=release::"$(curl -sL https://api.github.com/repos/Jigsaw-Code/outline-server/releases | jq -r '[.[] | select(.prerelease == false)][0].tag_name')"
+          git clone https://github.com/Jigsaw-Code/outline-server.git outline-server
+          cd outline-server
+          echo "::set-output name=tag::$(git describe --tags --abbrev=0)"
       - name: Get local release
         id: local
         run: |
-          echo ::set-output name=tag::"$(curl -sL "https://api.github.com/repos/${{github.repository}}/releases" | jq -r '[.[] | select(.tag_name | startswith("latest-"))][0].name')"
-          echo ::set-output name=release::"$(curl -sL "https://api.github.com/repos/${{github.repository}}/releases" | jq -r '[.[] | select(.tag_name | startswith("release-"))][0].tag_name')"
+          echo ::set-output name=tag::"$(curl -sL "https://api.github.com/repos/${{github.repository}}/releases?per_page=100" | jq -r '[.[] | select(.name | startswith("latest-"))][0].name')"
       - name: Test
         id: test
         run: |
           if [[ "latest-${{steps.remote.outputs.tag}}" != "${{steps.local.outputs.tag}}" ]];
           then
             echo "::set-output name=latest::true"
-          fi
-          if [[ "release-${{steps.remote.outputs.release}}" != "${{steps.local.outputs.release}}" ]];
-          then
-            echo "::set-output name=release::true"
           fi
   build_master:
     needs: [version]
@@ -62,7 +55,7 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: Build and push
         run: |
-          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:master" "master" "false"
+          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:master" "master"
   build_latest:
     needs: [version]
     runs-on: ubuntu-20.04
@@ -72,7 +65,7 @@ jobs:
         uses: actions/checkout@v2
       - uses: actions/setup-node@v3
         with:
-          node-version: 12
+          node-version: 16
       - name: Setup QEMU
         uses: docker/setup-qemu-action@v1
         with:
@@ -88,7 +81,7 @@ jobs:
           password: ${{secrets.GITHUB_TOKEN}}
       - name: Build and push
         run: |
-          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:latest" "${{needs.version.outputs.remote_tag}}" "true"
+          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:latest" "${{needs.version.outputs.remote_tag}}"
       - name: Conditional release
         uses: actions/create-release@v1
         env:
@@ -101,41 +94,3 @@ jobs:
             Please, read README to deploy this package.
           draft: false
           prerelease: true
-  build_release:
-    needs: [version]
-    runs-on: ubuntu-20.04
-    if: needs.version.outputs.is_release_build_required == 'true'
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 12
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v1
-        with:
-          image: tonistiigi/binfmt:latest
-          platforms: all
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{github.repository_owner}}
-          password: ${{secrets.GITHUB_TOKEN}}
-      - name: Build and push
-        run: |
-          bash ./build.sh "${{env.ARCH}}" "${{env.PACKAGE_NAME}}:release" "${{needs.version.outputs.remote_release}}" "true"
-      - name: Conditional release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-        with:
-          tag_name: "release-${{needs.version.outputs.remote_release}}"
-          release_name: "release-${{needs.version.outputs.remote_release}}"
-          body: |
-            This release is for identification use of CI script.
-            Please, read README to deploy this package.
-          draft: false
-          prerelease: false

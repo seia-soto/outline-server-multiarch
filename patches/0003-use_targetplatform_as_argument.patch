@@ -1,0 +1,21 @@
+diff --git a/src/shadowbox/docker/Dockerfile b/src/shadowbox/docker/Dockerfile
+index 81feb8e8..5d4205a3 100644
+--- a/src/shadowbox/docker/Dockerfile
++++ b/src/shadowbox/docker/Dockerfile
+@@ -17,6 +17,7 @@ ARG NODE_IMAGE
+ # Multi-stage build: use a build image to prevent bloating the shadowbox image with dependencies.
+ # Run `npm ci` and build inside the container to package the right dependencies for the image.
+ FROM ${NODE_IMAGE} AS build
++ARG TARGETPLATFORM
+ 
+ # make for building third_party/prometheus and perl-utils for shasum.
+ RUN apk add --no-cache --upgrade bash make perl-utils
+@@ -31,7 +32,7 @@ RUN npm ci
+ COPY scripts scripts/
+ COPY src src/
+ COPY tsconfig.json ./
+-COPY third_party third_party
++COPY third_parties/${TARGETPLATFORM} third_party
+ RUN ROOT_DIR=/ npm run action shadowbox/server/build
+ 
+ # shadowbox image
