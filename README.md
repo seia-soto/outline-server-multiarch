@@ -6,17 +6,17 @@ The multi-arch distribution of [Jigsaw's Outline-Server](https://github.com/Jigs
 |---------|----------------------------------------------|-----------------|------------------------------------------------------|
 | master  | daily                                        | upstream/master | linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6 |
 | latest  | checked daily, released as upstream tags     | Latest tag      | linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6 |
-| release | checked daily, released as upstream releases | Latest release  | linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6 |
+| release | checked daily, not more updated (legacy)     | v1.9 or lower   | linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6 |
 
 ## Usage
 
 To install outline-server on your server using this docker image, paste following code before install:
 
 ```bash
-# master release, updated daily
+# master release, updated daily (might fail sometime)
 export SB_IMAGE="ghcr.io/seia-soto/shadowbox:master"
 
-# stable release, updated infrequently
+# stable release, NOT MORE UPDATED (It is for outline-server v1.9 or lower, use `latest` instead)
 export SB_IMAGE="ghcr.io/seia-soto/shadowbox:release"
 
 # latest release, updated irregularly
@@ -26,9 +26,21 @@ export SB_IMAGE="ghcr.io/seia-soto/shadowbox:latest"
 curl -sL "https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/src/server_manager/install_scripts/install_server.sh" | sed '/local MACHINE_TYPE/,/fi/{d}' | bash
 ```
 
+## Development
+
+### Patching
+
+There're Makefile in this repository and contains some useful commands for development, but you can continue only with `git diff` command.
+
+Use `make help` to print help script.
+
+Starting with `make clone-upstream apply-patches` would be help.
+
 ### Local build
 
-To build local image, you can use following command with prepared environment:
+> The build script uses Docker Buildx and you cannot publish the output image directly to the Docker daemon.
+
+To build image locally, you can use following command with prepared environment:
 
 - For **single-arch** build, you just need to install:
   - `jq`
@@ -52,16 +64,21 @@ cd outline-server-multiarch
 
 Usage:
 
-    ./build.sh $arch $tag $checkpoint $use_legacy_install
+    ./build.sh $arch $tag $checkpoint
+
+    -- Arguments:
 
     $arch {string} The arch to build, using docker platform style
     $tag {string} The docker tag to use while building the image
     $checkpoint {string} The git branch or tag to checkout on Jigsaw-Code/Outline-Server
-    $use_legacy_install {boolean} Set as true to build recent versions of outline-server using Node.JS v16 (likely on master branch)
+
+    -- Environments:
+
+    $AB_LEAVE_BASE_DIRECTORY {any} If it is not empty string, script will not clean working directory
 
 About:
 
-    This script builds Outline-Server docker image
+    This script builds Outline-Server docker buildx image
     with specific arch by downloading compatible third_party
     automatically.
 '
@@ -73,7 +90,7 @@ PLATFORM="linux/amd64" # use one of linux/amd64,linux/arm64,linux/arm/v7,linux/a
 CHECKPOINT="latest" # use latest for latest tag or `master`
 
 # build latest, use false for use_legacy_install if you're building master branch
-bash ./build.sh "${PLATFORM}" "${SB_IMAGE}" "${CHECKPOINT}" "true"
+bash ./build.sh "${PLATFORM}" "${SB_IMAGE}" "${CHECKPOINT}"
 
 # run install script
 curl -sL "https://raw.githubusercontent.com/Jigsaw-Code/outline-server/master/src/server_manager/install_scripts/install_server.sh" | sed '/local MACHINE_TYPE/,/fi/{d}' | bash
@@ -101,7 +118,7 @@ Also, the build script which named `/build.sh` will clone the Outline-Server rep
 Other files which created by HoJeong Go (a.k.a Seia-Soto) has been licensed with [MIT License](./LICENSE).
 
 ```
-MIT License Copyright 2022 HoJeong Go
+MIT License Copyright 2022-2023 HoJeong Go
 
 Permission is hereby granted, free of
 charge, to any person obtaining a copy of this software and associated

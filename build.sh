@@ -6,16 +6,21 @@ set -x
 
 Usage:
 
-    ./build.sh $arch $tag $checkpoint $use_legacy_install
+    ./build.sh $arch $tag $checkpoint
+
+    -- Arguments:
 
     $arch {string} The arch to build, using docker platform style
     $tag {string} The docker tag to use while building the image
     $checkpoint {string} The git branch or tag to checkout on Jigsaw-Code/Outline-Server
-    $use_legacy_install {boolean} Set as true to build recent versions of outline-server using Node.JS v16 (likely on master branch)
+
+    -- Environments:
+
+    $AB_LEAVE_BASE_DIRECTORY {any} If it is not empty string, script will not clean working directory
 
 About:
 
-    This script builds Outline-Server docker image
+    This script builds Outline-Server docker buildx image
     with specific arch by downloading compatible third_party
     automatically.
 '
@@ -34,7 +39,6 @@ TMP=$(mktemp -d)
 ARCH=${1}
 TAG=${2}
 CHECKPOINT=${3}
-USE_LEGACY_INSTALL=${4}
 
 export DOCKER_PLATFORMS="${ARCH}"
 
@@ -68,16 +72,14 @@ unpack_archive_from_url() {
 remap_arch() {
     local ARCH="${1}" AMD64="${2:-amd64}" ARM64="${3:-arm64}" ARMv7="${4:-armv7}" ARMv6="${5:-armv6}"
 
-    [[ "${ARCH}" == *"amd64"* ]] && ARCH="${AMD64}"
-    [[ "${ARCH}" == *"arm64"* ]] && ARCH="${ARM64}"
-    [[ "${ARCH}" == *"v7"* ]] && ARCH="${ARMv7}"
-    [[ "${ARCH}" == *"v6"* ]] && ARCH="${ARMv6}"
-
-    echo "${ARCH}"
+    [[ "${ARCH}" == *"amd64"* ]] && echo "${AMD64}"
+    [[ "${ARCH}" == *"arm64"* ]] && echo "${ARM64}"
+    [[ "${ARCH}" == *"v7"* ]] && echo "${ARMv7}"
+    [[ "${ARCH}" == *"v6"* ]] && echo "${ARMv6}"
 }
 
 # Clone outline-server
-git clone "https://github.com/${REPO_BASE}.git" "${NS_BASE}"
+[[ ! -d "./outline-server" ]] && git clone "https://github.com/${REPO_BASE}.git" "${NS_BASE}"
 
 # Go to repo and checkout to latest release
 cd "${NS_BASE}"
@@ -98,8 +100,8 @@ do
 
     unpack_archive_from_url "${NS_SSS}.${ARCH_SSS}" "${RES_SSS}" "0"
 
-    mkdir -p "third_parties/${C_ARCH}/outline-ss-server/linux"
-    mv "${TMP}/${NS_SSS}.${ARCH_SSS}/outline-ss-server" "third_parties/${C_ARCH}/outline-ss-server/linux"
+    mkdir -p "third_parties/${C_ARCH}/outline-ss-server"
+    mv "${TMP}/${NS_SSS}.${ARCH_SSS}/outline-ss-server" "third_parties/${C_ARCH}/outline-ss-server/"
 
     # Download prometheus
     ARCH_PROM="$(remap_arch "${C_ARCH}" amd64 arm64 armv7 armv6)"
@@ -107,35 +109,24 @@ do
 
     unpack_archive_from_url "${NS_PROM}.${ARCH_PROM}" "${RES_PROM}" "1"
 
-    mkdir -p "third_parties/${C_ARCH}/prometheus/linux"
-    mv "${TMP}/${NS_PROM}.${ARCH_PROM}/prometheus" "third_parties/${C_ARCH}/prometheus/linux"
+    mkdir -p "third_parties/${C_ARCH}/prometheus"
+    mv "${TMP}/${NS_PROM}.${ARCH_PROM}/prometheus" "third_parties/${C_ARCH}/prometheus/"
 done
 
-# Modify build environment
-sed -i -e \
-    '/COPY third_party/s/^COPY third_party third_party/ARG TARGETPLATFORM\nCOPY third_parties\/\$\{TARGETPLATFORM\} third_party/' \
-    "src/shadowbox/docker/Dockerfile"
+# Apply patches
+for FILE in ../patches/*.patch; do
+    [[ -e "${FILE}" ]] || continue;
+    git apply "${FILE}";
+done;
 
 # Build docker-image
 export SB_IMAGE="${TAG}"
-export DOCKER_CONTENT_TRUST="0"
+export NODE_IMAGE="node:16-alpine"
 
-if [[ "${USE_LEGACY_INSTALL}" == "true" ]]; then
-    export NODE_IMAGE="node:12-alpine"
-
-    \cp -f "../extra/scripts/build.action.sh" "src/shadowbox/docker/build_action.sh"
-
-    npm run do shadowbox/docker/build
-else
-    export NODE_IMAGE="node:16-alpine"
-
-    \cp -f "../extra/scripts/build.action.sh" "src/shadowbox/docker/build.action.sh"
-
-    npm run action shadowbox/docker/build
-fi
+npm run action shadowbox/docker/build
 
 # Clean-up
 cd ..
 
 rm -rf "${TMP}"
-rm -rf "${NS_BASE}"
+[[ "${AB_LEAVE_BASE_DIRECTORY}" == "" ]] && rm -rf "${NS_BASE}"
