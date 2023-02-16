@@ -8,13 +8,19 @@ Usage:
 
     ./build.sh $arch $tag $checkpoint
 
+    -- Arguments:
+
     $arch {string} The arch to build, using docker platform style
     $tag {string} The docker tag to use while building the image
     $checkpoint {string} The git branch or tag to checkout on Jigsaw-Code/Outline-Server
 
+    -- Environments:
+
+    $AB_LEAVE_BASE_DIRECTORY {any} If it is not empty string, script will not clean working directory
+
 About:
 
-    This script builds Outline-Server docker image
+    This script builds Outline-Server docker buildx image
     with specific arch by downloading compatible third_party
     automatically.
 '
