@@ -23,7 +23,7 @@ jobs:
       - name: Get local release
         id: local
         run: |
-          echo ::set-output name=tag::"$(curl -sL "https://api.github.com/repos/${{github.repository}}/releases?per_page=100" | jq -r '[.[] | select(.name | startswith("latest-"))][0].name')"
+          echo ::set-output name=tag::"$(curl -sL "https://api.github.com/repos/${{github.repository}}/releases" | jq -r '[.[] | select(.name | startswith("latest-"))][0].name')"
       - name: Test
         id: test
         run: |
@@ -93,4 +93,4 @@ jobs:
             This release is for identification use of CI script.
             Please, read README to deploy this package.
           draft: false
-          prerelease: true
+          prerelease: false
