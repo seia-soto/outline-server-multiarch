@@ -19,17 +19,17 @@ jobs:
         run: |
           git clone https://github.com/Jigsaw-Code/outline-server.git outline-server
           cd outline-server
-          echo "::set-output name=tag::$(git describe --tags --abbrev=0)"
+          echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
       - name: Get local release
         id: local
         run: |
-          echo ::set-output name=tag::"$(curl -sL "https://api.github.com/repos/${{github.repository}}/releases" | jq -r '[.[] | select(.name | startswith("latest-"))][0].name')"
+          echo "tag=$(curl -sL "https://api.github.com/repos/${{github.repository}}/releases" | jq -r '[.[] | select(.name | startswith("latest-"))] | sort_by(.published_at)[-1].name')" >> $GITHUB_OUTPUT
       - name: Test
         id: test
         run: |
           if [[ "latest-${{steps.remote.outputs.tag}}" != "${{steps.local.outputs.tag}}" ]];
           then
-            echo "::set-output name=latest::true"
+            echo "latest=true" >> $GITHUB_OUTPUT
           fi
   build_master:
     needs: [version]
