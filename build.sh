@@ -70,8 +70,8 @@ check_tooling() {
   require_command npm
 
   node_major="$(node -p 'process.versions.node.split(".")[0]')"
-  if [[ "${node_major}" != "18" ]]; then
-    echo "Node.js 18.x is required by upstream Outline Server." >&2
+  if [[ "${node_major}" != "24" ]]; then
+    echo "Node.js 24.x is required by this build." >&2
     echo "Current Node.js version: $(node --version)" >&2
     exit 1
   fi
