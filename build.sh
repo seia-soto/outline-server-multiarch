@@ -125,7 +125,6 @@ export NODE_IMAGE="node:16-alpine"
 
 npm run action shadowbox/docker/build
 
-# Clean-up
 cd ..
 
 rm -rf "${TMP}"

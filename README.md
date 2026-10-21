@@ -118,7 +118,6 @@ Also, the build script which named `/build.sh` will clone the Outline-Server rep
 Other files which created by HoJeong Go (a.k.a Seia-Soto) has been licensed with [MIT License](./LICENSE).
 
 ```
-MIT License Copyright 2022-2023 HoJeong Go
 
 Permission is hereby granted, free of
 charge, to any person obtaining a copy of this software and associated
